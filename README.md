@@ -5,7 +5,7 @@ Project_Hutao is a IoT project. Its main part is a desktop ornament made from ar
 ### the hardware
 #### the necessary part:
 1. Hutao Shake Toy
-  - more details see from the [Link](https://space.bilibili.com/8549577?spm_id_from=333.337.0.0). thanks for Kason's open source contribution.
+  - **more details see from the [Link](https://space.bilibili.com/8549577?spm_id_from=333.337.0.0). thanks for Kason's open source contribution.**
   - 3D printing parts
   - some toothpicks
   - a paper with some color printed pattern
