@@ -13,5 +13,7 @@ Project_Hutao is a IoT project. Its main part is a desktop ornament made from ar
   6. 502 glue
   7. a knife
   8. two wires
-2. emmm...
+2. 1
+3. 2
+4. 3
 
