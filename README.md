@@ -58,7 +58,7 @@ Pseudocode
 
 `#define LIGHTSENSOR (A0)`
 
-`#define X (A1)
+`#define X (A1)`
 
 `#define Y (A2)`
 
