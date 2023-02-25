@@ -1,4 +1,9 @@
-/*    0 Hutao Quick
+/*    Author: Junchi Wang（王骏驰）
+      Student ID: 20012100013
+      Project Name: Hutao Shake Toy
+      
+      Voice CMDs
+      0 Hutao Quick
       1 Hutao slow
       2 shake quick
       3 shake slow
@@ -16,9 +21,10 @@
                            <----------------------
                                    “quit”
 
-      0||1 : LOW
-      2 : HIGH
+      0||1 : not work
+      2 : work
 */
+//libraries
 #include <SoftwareSerial.h>
 #include <VoiceRecognitionV3.h>
 #include <Adafruit_Sensor.h>
@@ -40,13 +46,18 @@ uint8_t buf[64];
 
 uint8_t generalState = 0;
 uint8_t lightState = 0; // 1 light, 0 dark
-uint8_t counter = 0;
+uint8_t UILineState = 3; // chosen line on OLED screen
+uint8_t counterOLED = 0; // counter for OLED refresh
+uint8_t counterSwitchXY = 0; // counter for rocker CD
+
 
 uint8_t hutaoRGBVal[3] = {121, 2, 2};
 float currentTemperature;
 float currentHumidity;
+//define constants
 const PROGMEM int fluxHigherLimit = 400;
 const PROGMEM int fluxLowerLimit = 360;
+//define Voice CMDs index
 #define hutao1Cmd (0)
 #define hutao2Cmd (1)
 #define shake1Cmd (2)
@@ -66,11 +77,16 @@ const PROGMEM int fluxLowerLimit = 360;
 #define selfCheckSuccessMode (2)
 #define selfCheckErrorMode (3)
 
-#define motor 6
+//define PINs
+#define LIGHTSENSOR 0
+#define X (1)
+#define Y (2)
+#define SWITCH (3)
+#define MOTOR 6
 #define DHTPIN 12
-#define bluePin 8
-#define greenPin 9
-#define redPin 10
+#define BLUEPIN 8
+#define GREENPIN 9
+#define REDPIN 10
 #define DHTTYPE    DHT22
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
@@ -159,11 +175,12 @@ void setup()
   dht.begin();
   oled.begin(&Adafruit128x64, I2C_ADDRESS, RST_PIN);
   initialDisplay();
-  pinMode(motor, OUTPUT);
 
-  pinMode(bluePin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(redPin, OUTPUT);
+  //define PINs function
+  pinMode(MOTOR, OUTPUT);
+  pinMode(BLUEPIN, OUTPUT);
+  pinMode(GREENPIN, OUTPUT);
+  pinMode(REDPIN, OUTPUT);
 
   records[0] = hutao1Cmd;
   records[1] = hutao2Cmd;
@@ -186,7 +203,7 @@ void setup()
       ;
   }
 
-  if (myVR.load(records, 7) >= 0)
+  if (myVR.load(records, 7) >= 0) //load records
   {
     Serial.println(F("CMDs loaded"));
     RGBLightColorChange(selfCheckSuccessMode);
@@ -195,19 +212,19 @@ void setup()
 
 }
 
-uint8_t* RGBLightFluxChange(uint8_t hutaoRGBVal[3], int delta)//Flux
+uint8_t* RGBLightFluxChange(uint8_t hutaoRGBVal[3], int delta)//Control the RGB light lightness
 {
-  switch (hutaoRGBVal[0])
+  switch (hutaoRGBVal[0]) //40 means low lightness, 121 means medium lightness, 201 means high lightness
   {
 
     case 121:
-      if (delta > 0)
+      if (delta > 0) //delta > 0 means make the RGB light brighter.
       {
         hutaoRGBVal[0] = 201;
         hutaoRGBVal[1] = 3;
         hutaoRGBVal[2] = 3;
       }
-      else
+      else //delta <= 0 means make the RGB light darker.
       {
         hutaoRGBVal[0] = 40;
         hutaoRGBVal[1] = 1;
@@ -215,7 +232,7 @@ uint8_t* RGBLightFluxChange(uint8_t hutaoRGBVal[3], int delta)//Flux
       }
       break;
     case 201:
-      if (delta <= 0)
+      if (delta <= 0) 
       {
         hutaoRGBVal[0] = 121;
         hutaoRGBVal[1] = 2;
@@ -239,13 +256,20 @@ uint8_t* RGBLightFluxChange(uint8_t hutaoRGBVal[3], int delta)//Flux
   }
   return hutaoRGBVal;
 }
-void RGBLightColorChange(uint8_t mode)//Color、Behavior
+void RGBLightColorChange(uint8_t mode)//Control the behavior and Color of RGB light, drive the RGB light
 {
   uint8_t RGBVal[3];
-  if (analogRead(0) > fluxHigherLimit)
-    lightState = 1;
-  else if (analogRead(0) < fluxLowerLimit)
-    lightState = 0;
+// Check if the light sensor reading is higher than the upper limit
+if (analogRead(LIGHTSENSOR) > fluxHigherLimit) {
+  // Set the light state to 1 (bright)
+  lightState = 1;
+}
+// If the light sensor reading is not higher than the upper limit,
+// check if it is lower than the lower limit
+else if (analogRead(LIGHTSENSOR) < fluxLowerLimit) {
+  // Set the light state to 0 (dark)
+  lightState = 0;
+}
   if (mode == 0)
   {
     if (lightState) // dark --> light on
@@ -298,37 +322,75 @@ void RGBLightColorChange(uint8_t mode)//Color、Behavior
     RGBVal[1] = 0;
     RGBVal[0] = 255;
   }
-  analogWrite(bluePin, 255 - RGBVal[2]);  // blue 255 - 26
-  analogWrite(greenPin, 255 - RGBVal[1]); // green  255 - 26
-  analogWrite(redPin, 255 - RGBVal[0]);   // red 255 - 151
+  //drive the RGB light                      E.X.
+  analogWrite(BLUEPIN, 255 - RGBVal[2]);  // blue 255 - 26
+  analogWrite(GREENPIN, 255 - RGBVal[1]); // green  255 - 26
+  analogWrite(REDPIN, 255 - RGBVal[0]);   // red 255 - 151
 }
-void printState()
+void printState() //Send the state to the upper machine by UART
 {
-  Serial.println((String)generalState + "," + (String)buf[1]);
-
+  Serial.print(F("MEG,"));
+  Serial.print((String)generalState);
+  Serial.print(F(","));
+  Serial.print((String)hutaoRGBVal[0]);
+  Serial.print(F(","));
+  Serial.print((String)currentTemperature);
+  Serial.print(F(","));
+  Serial.print((String)currentHumidity);
+  Serial.print(F("\0"));
 }
-void voiceRecognition()
+void toIntermediateState() //transition to IntermediateState
+{
+  generalState = intermediateState;
+  myVR.clear();
+  records[0] = shake1Cmd;
+  records[1] = shake2Cmd;
+  records[2] = bright1Cmd;
+  records[3] = bright2Cmd;
+  records[4] = dark1Cmd;
+  records[5] = dark2Cmd;
+  myVR.load(records, 7);
+}
+void toWorkState() //transition to WorkState
+{
+  generalState = workState;
+  myVR.clear();
+  records[0] = quit1Cmd;
+  records[1] = quit2Cmd;
+  records[2] = quit3Cmd;
+  records[3] = bright1Cmd;
+  records[4] = bright2Cmd;
+  records[5] = dark1Cmd;
+  records[6] = dark2Cmd;
+  myVR.load(records, 7);
+}
+void toInitialState()//transition to InitialState
+{
+  generalState = initialState;
+  myVR.clear();
+  records[0] = hutao1Cmd;
+  records[1] = hutao2Cmd;
+  records[2] = bright1Cmd;
+  records[3] = bright2Cmd;
+  records[4] = dark1Cmd;
+  records[5] = dark2Cmd;
+  myVR.load(records, 7);
+}
+void voiceRecognition() //Control by Voice CMDs
 {
   int ret;
   uint8_t* hutaoRGBValCopy;
-  ret = myVR.recognize(buf, 50);
+  ret = myVR.recognize(buf, 50); //Voice Recognizition
   if (ret > 0)
   {
     switch (generalState)
     { // buf[1]
-      case (initialState):
+      case (initialState): 
         {
           if (buf[1] == hutao1Cmd or buf[1] == hutao2Cmd)
+          //if the Voice CMD is "Hutao"
           {
-            generalState = intermediateState;
-            myVR.clear();
-            records[0] = shake1Cmd;
-            records[1] = shake2Cmd;
-            records[2] = bright1Cmd;
-            records[3] = bright2Cmd;
-            records[4] = dark1Cmd;
-            records[5] = dark2Cmd;
-            myVR.load(records, 7);
+            toIntermediateState(); 
           }
           break;
         }
@@ -336,17 +398,9 @@ void voiceRecognition()
       case (intermediateState):
         {
           if (buf[1] == shake1Cmd or buf[1] == shake2Cmd)
+          //if the Voice CMD is "Shake"
           {
-            generalState = workState;
-            myVR.clear();
-            records[0] = quit1Cmd;
-            records[1] = quit2Cmd;
-            records[2] = quit3Cmd;
-            records[3] = bright1Cmd;
-            records[4] = bright2Cmd;
-            records[5] = dark1Cmd;
-            records[6] = dark2Cmd;
-            myVR.load(records, 7);
+            toWorkState();
           }
           break;
         }
@@ -354,17 +408,8 @@ void voiceRecognition()
       case (workState):
         {
           if (buf[1] == quit1Cmd or buf[1] == quit2Cmd or buf[1] == quit3Cmd)
-          { // quit
-            generalState = initialState;
-            myVR.clear();
-            records[0] = hutao1Cmd;
-            records[1] = hutao2Cmd;
-            records[2] = bright1Cmd;
-            records[3] = bright2Cmd;
-            records[4] = dark1Cmd;
-            records[5] = dark2Cmd;
-            myVR.load(records, 7);
-
+          { //if the Voice CMD is "quit"
+            toInitialState();
           }
           break;
         }
@@ -385,61 +430,240 @@ void voiceRecognition()
       hutaoRGBVal[2] = hutaoRGBValCopy[2];
     }
     /** voice recognized */
-    printState();
     stateDisplay();
   }
 }
+void switchXY() //control by rocker
+{
+  uint8_t* hutaoRGBValCopy;
+  if (counterSwitchXY == 5)
+  {
+    if (UILineState == 3)
+    {
+      if ((analogRead(X) > 800 or analogRead(X) < 200)) //if the rocker operation is up or down 
+      {
+        UILineState = 4;
+        stateDisplay();
+
+      }
+      else if (analogRead(Y) < 200) //if the rocker operation is right
+      {
+        hutaoRGBValCopy = RGBLightFluxChange(hutaoRGBVal, 1);
+        hutaoRGBVal[0] = hutaoRGBValCopy[0];
+        hutaoRGBVal[1] = hutaoRGBValCopy[1];
+        hutaoRGBVal[2] = hutaoRGBValCopy[2];
+        stateDisplay();
+
+      }
+      else if (analogRead(Y) > 800) //if the rocker operation is left
+      {
+        hutaoRGBValCopy = RGBLightFluxChange(hutaoRGBVal, -1);
+        hutaoRGBVal[0] = hutaoRGBValCopy[0];
+        hutaoRGBVal[1] = hutaoRGBValCopy[1];
+        hutaoRGBVal[2] = hutaoRGBValCopy[2];
+        stateDisplay();
+
+      }
+    }
+    else if (UILineState == 4)
+    {
+      if (analogRead(X) > 800 or analogRead(X) < 200) //if the rocker operation is up or down
+      {
+        UILineState = 3;
+        stateDisplay();
+      }
+      else
+      {
+        switch (generalState)
+        { // buf[1]
+          case (initialState):
+            {
+              if (analogRead(Y) < 200 or analogRead(Y) > 800) //if the rocker operation is right or left
+              {
+                toWorkState();
+                stateDisplay();
+              }
+              break;
+            }
+          case (intermediateState):
+            {
+              if (analogRead(Y) < 200 or analogRead(Y) > 800) //if the rocker operation is right or left
+              {
+                toWorkState();
+                stateDisplay();
+              }
+              break;
+            }
+          case (workState):
+            {
+              if (analogRead(Y) < 200 or analogRead(Y) > 800) //if the rocker operation is right or left
+              { // quit
+                toInitialState();
+                stateDisplay();
+              }
+              break;
+            }
+        }
+
+
+      }
+    }
+    counterSwitchXY = 0;
+  }
+
+}
+void executeUpperCMD() //contorl by upper machine
+{
+  uint8_t* hutaoRGBValCopy;
+  String message; //String is better than char*
+  String CMD_arr[3];
+  String tem = "";
+  uint8_t j = 0;
+  if (Serial.available())
+  {
+    message = Serial.readStringUntil('\n');
+    message.trim(); // remove leading and trailing whitespace
+    for (int i = 0; i < message.length(); i = i + 1)
+    {
+      if (message[i] == ',')
+      {
+        CMD_arr[j] = tem;
+        j = j + 1;
+        tem = "";
+      }
+      else
+      {
+        tem = tem + message[i];
+      }
+    }
+    if (message[message.length() - 1] != ',')
+      CMD_arr[j] = tem;
+    if (CMD_arr[0] == "CMD")
+    {
+      if (CMD_arr[1] == "L")
+      {
+        if (CMD_arr[2] == "1")
+        {
+          hutaoRGBValCopy = RGBLightFluxChange(hutaoRGBVal, 1);
+          hutaoRGBVal[0] = hutaoRGBValCopy[0];
+          hutaoRGBVal[1] = hutaoRGBValCopy[1];
+          hutaoRGBVal[2] = hutaoRGBValCopy[2];
+          stateDisplay();
+
+        }
+        else if (CMD_arr[2] == "-1")
+        {
+          hutaoRGBValCopy = RGBLightFluxChange(hutaoRGBVal, -1);
+          hutaoRGBVal[0] = hutaoRGBValCopy[0];
+          hutaoRGBVal[1] = hutaoRGBValCopy[1];
+          hutaoRGBVal[2] = hutaoRGBValCopy[2];
+          stateDisplay();
+
+        }
+      }
+      if (CMD_arr[1] == "M")
+      {
+        switch (generalState)
+        { // buf[1]
+          case (initialState):
+            {
+              if (CMD_arr[2] == "1")
+              {
+                toWorkState();
+                stateDisplay();
+              }
+              break;
+            }
+          case (intermediateState):
+            {
+              if (CMD_arr[2] == "1")
+              {
+                toWorkState();
+                stateDisplay();
+              }
+              break;
+            }
+          case (workState):
+            {
+              if (CMD_arr[2] == "0")
+              { // quit
+                toInitialState();
+                stateDisplay();
+              }
+              break;
+            }
+        }
+      }
+    }
+  }
+
+}
+
+
 
 void loop()
 {
-  voiceRecognition();
-  switch (generalState)
+  switchXY(); //control by a physical rocker
+  executeUpperCMD(); //control by upper machine CMD
+  voiceRecognition(); //control by Voice
+  switch (generalState) //Accoring to the state, drive the motor(Hutao Shake Toy)
   {
     case (initialState):
       {
-        digitalWrite(motor, LOW);
+        digitalWrite(MOTOR, LOW);
         RGBLightColorChange(0);
         break;
       }
     case (intermediateState):
       {
-        digitalWrite(motor, LOW); // maxCurrent = 20 mA
+        digitalWrite(MOTOR, LOW); // maxCurrent = 20 mA
         RGBLightColorChange(0);
         break;
       }
     case (workState):
       {
-        digitalWrite(motor, HIGH);
+        digitalWrite(MOTOR, HIGH);
         // RGB light
         RGBLightColorChange(1);
         break;
       }
     default:
       {
-        digitalWrite(motor, LOW);
+        digitalWrite(MOTOR, LOW);
         RGBLightColorChange(0);
         break;
       }
   }
-  counter = counter + 1;
-  if ((int)counter == 10)
+  //OLED counter
+  counterOLED = counterOLED + 1;
+  if ((int)counterOLED == 5) //OLED refresh time = 5 * LoopTime
   {
     stateDisplay();
-    counter = 0;
+    counterOLED = 0;
+  }
+  //Switch counter
+  if ((int)counterSwitchXY < 5) //rocker control CD = 5 * LoopTime
+  {
+    counterSwitchXY = counterSwitchXY + 1;
+  }
+  else
+  {
+    counterSwitchXY = 5;
   }
 
 
 }
 
-void stateDisplay()
-{
-  // 清除屏幕
+// Define a function to display the current state on the OLED screen and upper machine screen
+void stateDisplay() {
+  // Clear the screen and set the font to Callibri11
+  oled.clear();
   oled.setFont(Callibri11);
 
-  // 设置字体颜色,白色可见
-  oled.clear();
+  // Set the font color to white for better visibility and set the display to 1x
   oled.set1X();
 
+  // Read the temperature and humidity using the DHT sensor
   sensors_event_t event;
   dht.temperature().getEvent(&event);
   if (!isnan(event.temperature)) {
@@ -450,14 +674,17 @@ void stateDisplay()
     currentHumidity = event.relative_humidity;
   }
 
-
-  //设置光标位置
+  // Display the temperature and humidity readings on the OLED screen
   oled.print(F("Temperature: "));
   oled.print(currentTemperature);
   oled.println(F("C"));
   oled.print(F("Humidity: "));
   oled.print(currentHumidity);
   oled.println(F("%"));
+
+  // Display the brightness level on the OLED screen
+  if (UILineState == 3)
+    oled.setInvertMode(1);
 
   oled.print(F("Brightness: "));
   if (hutaoRGBVal[0] == 201)
@@ -468,24 +695,33 @@ void stateDisplay()
     oled.println(F("---"));
 
   oled.println(F(""));
+  oled.setInvertMode(0);
 
-
+  // Display the current state of the toy on the OLED screen
+  if (UILineState == 4)
+    oled.setInvertMode(1);
   if (generalState == initialState)
     oled.println(F("ZZZ"));
   else if (generalState == intermediateState)
     oled.println(F("Hutao Heard you!"));
   else
     oled.println(F("Shake! Shake!"));
+  oled.setInvertMode(0);
+
+  // Print the current state to the upper machine screen
+  printState();
 }
-void initialDisplay()
-{
-  // 清除屏幕
-  oled.setFont(Callibri14);
 
-  // 设置字体颜色,白色可见
+// Define a function to display a welcome message on the OLED screen
+void initialDisplay() {
+  // Clear the screen
   oled.clear();
-  oled.set1X();
 
+  // Set the font to Callibri15
+  oled.setFont(Callibri15);
+
+
+  // Print the welcome message on the screen using println()
   oled.println();
   oled.println(("    Hutao Shake Toy"));
   oled.println(("          Welcome!"));
