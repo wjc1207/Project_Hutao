@@ -33,4 +33,15 @@ the total cost is about **18 CNY** in Taobao in China. (of course exclude the 3D
 #### the useless part:
 1. FPGA (asked by my teacher)
 
+### the hardware
+#### the necessary part:
+1. Arduino IDE
 
+#### the aditional part:
+1. Cura/PursaSlicer
+2. SoildWorks/fushion360/Blender
+
+#### the useless part: (asked by my teacher)
+1. Quartus 2 (for FPGA part)
+2. Visio Studio (for winForm)
+3. Dreamweaver (for web design)
