@@ -18,7 +18,7 @@ Project_Hutao is a IoT project. Its main part is a desktop ornament made from ar
 4. 0.96' 128x64 1306 OLED screen
 5. a BJT with over 400mA load current
 
-the total cost is about 150 CNY in Taobao in China.
+the total cost is about **150 CNY** in Taobao in China.
 
 #### the aditional part:
 1. DHT22 module
@@ -27,7 +27,8 @@ the total cost is about 150 CNY in Taobao in China.
 4. a breadboard
 5. a rocker
 6. a 3D printer (useful for geeks)
-the total cost is about 18 CNY in Taobao in China. (of course exclude the 3D printer)
+7. 
+the total cost is about **18 CNY** in Taobao in China. (of course exclude the 3D printer)
 
 #### the useless part:
 1. FPGA (asked by my teacher)
