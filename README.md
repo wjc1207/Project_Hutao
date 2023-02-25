@@ -57,15 +57,27 @@ the total cost is about **18 CNY** in Taobao in China. (of course exclude the 3D
 Pseudocode
 
 `#define LIGHTSENSOR (A0)
+
 #define X (A1)
+
 #define Y (A2)
+
 #define SWITCH (A3)
+
 #define SDA (A4)
+
 #define SCL (A5)
+
 #define VR_TX 2
+
 #define VR_RX 3
+
 #define MOTOR 6
+
 #define DHTPIN 12
+
 #define BLUEPIN 8
+
 #define GREENPIN 9
+
 #define REDPIN 10`
