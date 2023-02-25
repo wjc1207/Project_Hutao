@@ -29,7 +29,7 @@ the total cost is about **150 CNY** in Taobao in China.
 4. a breadboard
 5. a rocker
 6. a 3D printer (useful for geeks)
-7. 
+
 the total cost is about **18 CNY** in Taobao in China. (of course exclude the 3D printer)
 
 #### the useless part:
@@ -49,3 +49,4 @@ the total cost is about **18 CNY** in Taobao in China. (of course exclude the 3D
 1. Quartus 2 (for FPGA part)
 2. Visio Studio (for winForm)
 3. Dreamweaver (for web design)
+
