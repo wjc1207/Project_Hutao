@@ -58,26 +58,14 @@ Pseudocode
 
 `#define LIGHTSENSOR (A0)`
 
-`#define X (A1)`
+`#define (X,Y,SWITCH) (A1,A2,A3)`
 
-`#define Y (A2)`
+`#define (SDA,SCL) (A4,A5)`
 
-`#define SWITCH (A3)`
+`#define (VR_TXVR_RX) (D2,D3)`
 
-`#define SDA (A4)`
+`#define MOTOR (D6)`
 
-`#define SCL (A5)`
+`#define DHTPIN (D12)`
 
-`#define VR_TX 2`
-
-`#define VR_RX 3`
-
-`#define MOTOR 6`
-
-`#define DHTPIN 12`
-
-`#define BLUEPIN 8`
-
-`#define GREENPIN 9`
-
-`#define REDPIN 10`
+`#define (BLUEPIN,GREENPIN,REDPIN) (D8,D9,D10)`
