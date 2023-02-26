@@ -83,10 +83,10 @@ const PROGMEM int fluxLowerLimit = 360;
 #define Y (2)
 #define SWITCH (3)
 #define MOTOR 6
+#define BLUEPIN 9
+#define GREENPIN 10
+#define REDPIN 11
 #define DHTPIN 12
-#define BLUEPIN 8
-#define GREENPIN 9
-#define REDPIN 10
 #define DHTTYPE    DHT22
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
