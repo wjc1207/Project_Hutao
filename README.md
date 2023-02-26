@@ -64,7 +64,7 @@ Pseudocode
 
 `#define (SDA,SCL) (A4,A5)`
 
-`#define (VR_TXVR_RX) (D2,D3)`
+`#define (VR_TX,VR_RX) (D2,D3)`
 
 `#define MOTOR (D6)`
 
