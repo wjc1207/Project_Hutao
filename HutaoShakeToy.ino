@@ -1,7 +1,7 @@
 /*    Author: Junchi Wang（王骏驰）
       Student ID: 20012100013
       Project Name: Hutao Shake Toy
-      
+
       Voice CMDs
       0 Hutao Quick
       1 Hutao slow
@@ -233,7 +233,7 @@ uint8_t* RGBLightFluxChange(uint8_t hutaoRGBVal[3], int delta)//Control the RGB 
       }
       break;
     case 201:
-      if (delta <= 0) 
+      if (delta <= 0)
       {
         hutaoRGBVal[0] = 121;
         hutaoRGBVal[1] = 2;
@@ -260,17 +260,17 @@ uint8_t* RGBLightFluxChange(uint8_t hutaoRGBVal[3], int delta)//Control the RGB 
 void RGBLightColorChange(uint8_t mode)//Control the behavior and Color of RGB light, drive the RGB light
 {
   uint8_t RGBVal[3];
-// Check if the light sensor reading is higher than the upper limit
-if (analogRead(LIGHTSENSOR) > fluxHigherLimit) {
-  // Set the light state to 1 (bright)
-  lightState = 1;
-}
-// If the light sensor reading is not higher than the upper limit,
-// check if it is lower than the lower limit
-else if (analogRead(LIGHTSENSOR) < fluxLowerLimit) {
-  // Set the light state to 0 (dark)
-  lightState = 0;
-}
+  // Check if the light sensor reading is higher than the upper limit
+  if (analogRead(LIGHTSENSOR) > fluxHigherLimit) {
+    // Set the light state to 1 (bright)
+    lightState = 1;
+  }
+  // If the light sensor reading is not higher than the upper limit,
+  // check if it is lower than the lower limit
+  else if (analogRead(LIGHTSENSOR) < fluxLowerLimit) {
+    // Set the light state to 0 (dark)
+    lightState = 0;
+  }
   if (mode == 0)
   {
     if (lightState) // dark --> light on
@@ -386,12 +386,12 @@ void voiceRecognition() //Control by Voice CMDs
   {
     switch (generalState)
     { // buf[1]
-      case (initialState): 
+      case (initialState):
         {
           if (buf[1] == hutao1Cmd or buf[1] == hutao2Cmd)
-          //if the Voice CMD is "Hutao"
+            //if the Voice CMD is "Hutao"
           {
-            toIntermediateState(); 
+            toIntermediateState();
           }
           break;
         }
@@ -399,7 +399,7 @@ void voiceRecognition() //Control by Voice CMDs
       case (intermediateState):
         {
           if (buf[1] == shake1Cmd or buf[1] == shake2Cmd)
-          //if the Voice CMD is "Shake"
+            //if the Voice CMD is "Shake"
           {
             toWorkState();
           }
@@ -441,7 +441,7 @@ void switchXY() //control by rocker
   {
     if (UILineState == 3)
     {
-      if ((analogRead(X) > 800 or analogRead(X) < 200)) //if the rocker operation is up or down 
+      if ((analogRead(X) > 900 or analogRead(X) < 100)) //if the rocker operation is up or down
       {
         UILineState = 4;
         stateDisplay();
@@ -468,7 +468,7 @@ void switchXY() //control by rocker
     }
     else if (UILineState == 4)
     {
-      if (analogRead(X) > 800 or analogRead(X) < 200) //if the rocker operation is up or down
+      if (analogRead(X) > 900 or analogRead(X) < 100) //if the rocker operation is up or down
       {
         UILineState = 3;
         stateDisplay();
@@ -524,17 +524,17 @@ void executeUpperCMD() //contorl by upper machine
   {
     message = Serial.readStringUntil('\n');
     message.trim(); // remove leading and trailing whitespace
-  for (int i = 0; i < message.length(); i++)
-  {
-    if (message.charAt(i) == ',')
+    for (int i = 0; i < message.length(); i++)
     {
-      CMD_arr[j] = message.substring(0, i);
-      message.remove(0, i + 1);
-      j++;
-      i = 0;
+      if (message.charAt(i) == ',')
+      {
+        CMD_arr[j] = message.substring(0, i);
+        message.remove(0, i + 1);
+        j++;
+        i = 0;
+      }
     }
-  }
-  CMD_arr[j] = message; // 添加最后一个子字符串
+    CMD_arr[j] = message; // 添加最后一个子字符串
     if (CMD_arr[0] == "CMD")
     {
       if (CMD_arr[1] == "L")
@@ -671,14 +671,14 @@ void stateDisplay() {
   if (!isnan(event.relative_humidity)) {
     currentHumidity = event.relative_humidity;
   }
-  e = (currentHumidity/100)*6.105*exp((17.27*currentTemperature)/(237.7+currentTemperature));
+  e = (currentHumidity / 100) * 6.105 * exp((17.27 * currentTemperature) / (237.7 + currentTemperature));
   currentATemperature = 1.07 * currentTemperature + 0.2 * e - 2.7;
 
   // Display the temperature and humidity readings on the OLED screen
-  oled.print(F("ATemperature: "));
+  oled.print(F("ATempera:   "));
   oled.print(currentATemperature);
   oled.println(F("C"));
-  oled.print(F("Humidity: "));
+  oled.print(F("Humidity:     "));
   oled.print(currentHumidity);
   oled.println(F("%"));
 
@@ -686,7 +686,7 @@ void stateDisplay() {
   if (UILineState == 3)
     oled.setInvertMode(1);
 
-  oled.print(F("Brightness: "));
+  oled.print(F("Brightness:  "));
   if (hutaoRGBVal[0] == 201)
     oled.println(F("---------"));
   else if (hutaoRGBVal[0] == 121)
@@ -717,12 +717,12 @@ void initialDisplay() {
   // Clear the screen
   oled.clear();
 
-  // Set the font to Callibri15
-  oled.setFont(Callibri15);
+  // Set the font to Callibri14
+  oled.setFont(Callibri14);
 
 
   // Print the welcome message on the screen using println()
   oled.println();
-  oled.println(("    Hutao Shake Toy"));
-  oled.println(("          Welcome!"));
+  oled.println(("      Hutao Shake Toy"));
+  oled.println(("           Welcome!"));
 }
