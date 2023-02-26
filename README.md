@@ -20,7 +20,7 @@ Project_Hutao is a IoT project. Its main part is a desktop ornament made from ar
 2. an Arduino nano/uno R3
 3. a voice recognizition v3.0 board
 4. 0.96' 128x64 1306 OLED screen
-5. a BJT with over 400mA load current
+5. a BJT with over 400mA load current (for control the motor)
 
 the total cost is about **150 CNY** in Taobao in China.
 
