@@ -66,6 +66,6 @@ Pseudocode
 
 `#define MOTOR (D6)`
 
-`#define DHTPIN (D12)`
+`#define (BLUEPIN,GREENPIN,REDPIN) (D9,D10,D11)`
 
-`#define (BLUEPIN,GREENPIN,REDPIN) (D8,D9,D10)`
+`#define DHTPIN (D12)`
