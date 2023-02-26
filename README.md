@@ -2,6 +2,8 @@
 
 Project_Hutao is a IoT project. Its main part is a desktop ornament made from arduino nano with a light sensor, a DHT22 sensor, a voice recognetion v3 module, an OLED screen, a RGB light, a rocker and most important, a hutao shake toy. The technique includes the arduino, FPGA, 3D printing, SoildWorks, Winform, web and so on. The basic idea is from this [link](https://www.hackster.io/yuwork58426/voice-control-toy-and-display-using-xiao-and-edge-impulse-592bb4), but with different methods.
 
+![这是图片](/Images/Hutao.JPG "Hutao Shake Toy")
+
 ---
 
 ### **the hardware**
