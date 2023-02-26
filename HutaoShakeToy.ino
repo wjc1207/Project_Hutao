@@ -53,6 +53,7 @@ uint8_t counterSwitchXY = 0; // counter for rocker CD
 
 uint8_t hutaoRGBVal[3] = {121, 2, 2};
 float currentTemperature;
+float currentATemperature;
 float currentHumidity;
 //define constants
 const PROGMEM int fluxHigherLimit = 400;
@@ -334,7 +335,7 @@ void printState() //Send the state to the upper machine by UART
   Serial.print(F(","));
   Serial.print((String)hutaoRGBVal[0]);
   Serial.print(F(","));
-  Serial.print((String)currentTemperature);
+  Serial.print((String)currentATemperature);
   Serial.print(F(","));
   Serial.print((String)currentHumidity);
   Serial.print(F("\0"));
@@ -523,21 +524,17 @@ void executeUpperCMD() //contorl by upper machine
   {
     message = Serial.readStringUntil('\n');
     message.trim(); // remove leading and trailing whitespace
-    for (int i = 0; i < message.length(); i = i + 1)
+  for (int i = 0; i < message.length(); i++)
+  {
+    if (message.charAt(i) == ',')
     {
-      if (message[i] == ',')
-      {
-        CMD_arr[j] = tem;
-        j = j + 1;
-        tem = "";
-      }
-      else
-      {
-        tem = tem + message[i];
-      }
+      CMD_arr[j] = message.substring(0, i);
+      message.remove(0, i + 1);
+      j++;
+      i = 0;
     }
-    if (message[message.length() - 1] != ',')
-      CMD_arr[j] = tem;
+  }
+  CMD_arr[j] = message; // 添加最后一个子字符串
     if (CMD_arr[0] == "CMD")
     {
       if (CMD_arr[1] == "L")
@@ -665,6 +662,7 @@ void stateDisplay() {
 
   // Read the temperature and humidity using the DHT sensor
   sensors_event_t event;
+  float e;
   dht.temperature().getEvent(&event);
   if (!isnan(event.temperature)) {
     currentTemperature = event.temperature;
@@ -673,10 +671,12 @@ void stateDisplay() {
   if (!isnan(event.relative_humidity)) {
     currentHumidity = event.relative_humidity;
   }
+  e = (currentHumidity/100)*6.105*exp((17.27*currentTemperature)/(237.7+currentTemperature));
+  currentATemperature = 1.07 * currentTemperature + 0.2 * e - 2.7;
 
   // Display the temperature and humidity readings on the OLED screen
-  oled.print(F("Temperature: "));
-  oled.print(currentTemperature);
+  oled.print(F("ATemperature: "));
+  oled.print(currentATemperature);
   oled.println(F("C"));
   oled.print(F("Humidity: "));
   oled.print(currentHumidity);
