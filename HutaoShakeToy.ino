@@ -1,5 +1,4 @@
-/*    Author: Junchi Wang（王骏驰）
-      Student ID: 20012100013
+/*    Author: wjc74751
       Project Name: Hutao Shake Toy
 
       Voice CMDs
