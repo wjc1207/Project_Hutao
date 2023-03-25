@@ -29,7 +29,7 @@ the total cost is about **150 CNY** in Taobao in China.
 2. light sensor with a 10k resistor
 3. a RGB light with three 100 Ohms resistors
 4. a breadboard
-5. a rocker
+5. a joystick
 6. a 3D printer (useful for geeks)
 
 the total cost is about **18 CNY** in Taobao in China. (of course exclude the 3D printer)
