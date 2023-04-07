@@ -54,9 +54,12 @@ uint8_t hutaoRGBVal[3] = {121, 2, 2};
 float currentTemperature;
 float currentATemperature;
 float currentHumidity;
-//define constants
-const PROGMEM int fluxHigherLimit = 400;
-const PROGMEM int fluxLowerLimit = 360;
+//define constants 5V |------ R1 ------ Rs ------| GND
+#define RsLight 2 //(k Ohms)
+#define RsDark 20 //(k Ohms)
+#define R1 50 //(k Ohms)
+const PROGMEM int fluxHigherLimit = (int)(((float)RsLight/(float)(RsLight + R1) + (float)RsDark/((float)(RsDark + R1)) ) / 2 * 1024);
+const PROGMEM int fluxLowerLimit = fluxHigherLimit - 30;
 //define Voice CMDs index
 #define hutao1Cmd (0)
 #define hutao2Cmd (1)
