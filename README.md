@@ -26,7 +26,7 @@ the total cost is about **150 CNY** in Taobao in China.
 
 #### the aditional part:
 1. DHT22 module
-2. light sensor with a 10k resistor
+2. photoresistor with a resistor with resistance R1
 3. a RGB light with three 100 Ohms resistors
 4. a breadboard
 5. a joystick
